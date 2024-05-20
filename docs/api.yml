@@ -1,0 +1,1372 @@
+openapi: 3.0.0
+servers:
+  - url: https://www.bhut.com.br
+info:
+  version: 1.0.0
+  title: TIMESHEET API
+  description: API for timesheet
+  contact:
+    name: BHUT
+    url: 'https://www.bhut.com.br'
+    email: 'contato@bhut.com.br'
+  license:
+    name: MIT
+    url: https://api.github.com/licenses/mit
+tags:
+  - name: Api
+    description: Api endpoints
+  - name: Auth
+    description: Authentication endpoints
+  - name: Group
+    description: Group endpoints
+  - name: Holiday
+    description: Holiday endpoints
+  - name: Timesheet
+    description: Timesheet endpoints
+  - name: User
+    description: User endpoints
+paths:
+  /:
+    get:
+      summary: 'API manifest'
+      description: 'Return api manifest'
+      tags:
+        - Api
+      operationId: manifest
+      responses:
+        '200':
+          description: 'Api manifest'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                    example: '2020-03-03T15:45:02.000+01:00'
+                  version:
+                    type: string
+                    example: '1.0.0'
+  /is-alive:
+    get:
+      summary: 'API healthcheck'
+      description: 'Returns if the application is online.'
+      tags:
+        - Api
+      operationId: healthCheck
+      responses:
+        '200':
+          description: 'API is online'
+          content:
+            text/html:
+              schema:
+                type: string
+                example: 'OK!'
+  # AUTH ENDPOINTS
+  /v1/auth/token:
+    post:
+      tags:
+        - Auth
+      summary: 'Authenticate user'
+      description: 'Authenticate an existent user'
+      operationId: postAuthToken
+      requestBody:
+        description: 'Data to authenticate user'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+        required: true
+      responses:
+        '200':
+          description: 'Authenticated user JWT token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '403':
+          description: 'Access denied'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+  /v1/auth/refresh-token:
+    post:
+      tags:
+        - Auth
+      summary: 'Refresh token'
+      description: 'Refresh logged user token'
+      operationId: postAuthRefreshToken
+      requestBody:
+        description: 'Refresh token of the user who wants to renew access'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: 'Renewed User JWT Token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '403':
+          description: Access denied
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+  /v1/auth/recover-password:
+    post:
+      tags:
+        - Auth
+      summary: 'Request new password'
+      description: 'Request code to generate a new password'
+      operationId: postRecoverPassword
+      requestBody:
+        description: 'Recover password data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverPasswordRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+    put:
+      tags:
+        - Auth
+      summary: 'Change password'
+      description: 'Change password using code sended by email'
+      operationId: putRecoverPassword
+      requestBody:
+        description: 'Recover password data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+  # GROUP ENDPOINTS
+  /v1/group:
+    get:
+      tags:
+        - Group
+      summary: 'List group'
+      description: 'Return a group list'
+      operationId: listGroup
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/ListGroupResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  # HOLIDAY ENDPOINTS
+  /v1/holiday:
+    post:
+      tags:
+        - Holiday
+      summary: 'Create holiday'
+      description: 'Insert a holiday into the api'
+      operationId: createHoliday
+      requestBody:
+        description: 'Holiday data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHolidayRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+    get:
+      tags:
+        - Holiday
+      summary: 'List holiday'
+      description: 'Return a holiday list'
+      operationId: listHoliday
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/ListHolidayResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/holiday/{year}:
+    put:
+      tags:
+        - Holiday
+      summary: 'Update holiday'
+      description: 'Update a existent holiday'
+      operationId: updateHoliday
+      parameters:
+        - name: year
+          in: path
+          description: 'Year to filter'
+          schema:
+            type: integer
+            example: 2024
+          required: true
+      requestBody:
+        description: 'Holiday data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHolidayRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '409':
+          description: 'Resource already exists'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceAlreadyExistsResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  # TIMESHEET ENDPOINTS
+  /v1/timesheet/{year}/{month}:
+    get:
+      tags:
+        - Timesheet
+      summary: 'Get timesheet report'
+      description: 'Get an existent timesheet report'
+      operationId: getTimesheetReport
+      parameters:
+        - name: year
+          in: path
+          description: 'Year to filter'
+          schema:
+            type: integer
+            example: 2024
+          required: true
+        - name: month
+          in: path
+          description: 'Month to filter'
+          schema:
+            type: integer
+            example: 08
+          required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimesheetResponse'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/timesheet/{year}/{month}/{day}:
+    post:
+      tags:
+        - Timesheet
+      summary: 'Update timesheet report'
+      description: 'Update an existent timesheet report'
+      operationId: postTimesheetReport
+      parameters:
+        - name: year
+          in: path
+          description: 'Year to filter'
+          schema:
+            type: integer
+            example: 2024
+          required: true
+        - name: month
+          in: path
+          description: 'Month to filter'
+          schema:
+            type: integer
+            example: 08
+          required: true
+        - name: day
+          in: path
+          description: 'Day to filter'
+          schema:
+            type: integer
+            example: 25
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimesheetRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  # USER ENDPOINTS
+  /v1/user:
+    post:
+      tags:
+        - User
+      summary: 'Create User'
+      description: 'Insert a user into the api'
+      operationId: createUser
+      requestBody:
+        description: 'User data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+        required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+    get:
+      tags:
+        - User
+      summary: 'List user'
+      description: 'Return an user list'
+      operationId: listUser
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/ListUserResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/user/{id}:
+    get:
+      tags:
+        - User
+      summary: 'Get user'
+      description: 'Get user details'
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          description: 'Identifier to filter'
+          schema:
+            type: string
+            format: uuid
+            example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+          required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+    put:
+      tags:
+        - User
+      summary: 'Update user'
+      description: 'Update an existent user'
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          description: 'Identifier to filter'
+          schema:
+            type: string
+            format: uuid
+            example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+          required: true
+      requestBody:
+        description: 'User data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/user/{id}/password:
+    put:
+      tags:
+        - User
+      summary: 'Update user password'
+      description: 'Update an existent user password'
+      operationId: updateUserPassword
+      parameters:
+        - name: id
+          in: path
+          description: 'Identifier to filter'
+          schema:
+            type: string
+            format: uuid
+            example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+          required: true
+      requestBody:
+        description: 'User data'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPasswordRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/user/{id}/bank:
+    patch:
+      tags:
+        - User
+      summary: 'Launch negative hours'
+      description: 'Launch negative hours on database'
+      operationId: launchUserReport
+      parameters:
+        - name: id
+          in: path
+          description: 'Identifier to filter'
+          schema:
+            type: string
+            format: uuid
+            example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserBalanceRequest'
+        required: true
+      responses:
+        '204':
+          description: 'Request processed'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/user/{id}/report/{year}/{month}:
+    get:
+      tags:
+        - User
+      summary: 'Get user report'
+      description: 'Get an existent user report'
+      operationId: getUserReport
+      parameters:
+        - name: id
+          in: path
+          description: 'Identifier to filter'
+          schema:
+            type: string
+            format: uuid
+            example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+          required: true
+        - name: year
+          in: path
+          description: 'Year to filter'
+          schema:
+            type: integer
+            example: 2024
+          required: true
+        - name: month
+          in: path
+          description: 'Month to filter'
+          schema:
+            type: integer
+            example: 08
+          required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReportResponse'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+  /v1/user/{id}/report/{year}/{month}/closed:
+    patch:
+      tags:
+        - User
+      summary: 'Close user report'
+      description: 'Close user report'
+      operationId: closeUserReport
+      parameters:
+        - name: id
+          in: path
+          description: 'Identifier to filter'
+          schema:
+            type: string
+            format: uuid
+            example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+          required: true
+        - name: year
+          in: path
+          description: 'Year to filter'
+          schema:
+            type: integer
+            example: 2024
+          required: true
+        - name: month
+          in: path
+          description: 'Month to filter'
+          schema:
+            type: integer
+            example: 08
+          required: true
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloseUserReportResponse'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: 'Unauthorized'
+        '403':
+          description: 'Access denied'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceNotFoundResponse'
+        '500':
+          description: 'Internal server error'
+      security:
+        - ApiAuth: [ ]
+        - JwtAuth: [ ]
+components:
+  schemas:
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: user email
+          example: 'email@domain.com'
+        password:
+          type: string
+          description: user password
+          format: password
+          example: 'password@123'
+    AuthResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+      properties:
+        accessToken:
+          type: string
+          description: 'Auth token'
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        refreshToken:
+          type: string
+          description: 'Refresh token'
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        tokenType:
+          type: string
+          description: 'Token type'
+          example: 'Bearer'
+        expiresIn:
+          type: number
+          description: 'Expiration time'
+          example: 86400
+    ChangePasswordRequest:
+      type: object
+      required:
+        - password
+        - hash
+        - code
+      properties:
+        password:
+          type: string
+          format: password
+          description: 'First access password'
+          example: 'admin123'
+        hash:
+          type: string
+          description: 'Database control hash'
+          example: 'FCE86CDF7DBED14A8DB32F65F23BB5C9'
+        code:
+          type: string
+          description: 'Request control code'
+          example: '123456'
+    CloseUserReportResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 'User name'
+          example: 'John Doe'
+        team:
+          type: string
+          description: 'User team'
+          example: 'Bhut team'
+        bankHours:
+          type: boolean
+          description: 'Defines if user has bank hours'
+          example: true
+        calendar:
+          type: object
+          description: 'Calendar data'
+          allOf:
+            - $ref: '#/components/schemas/ReportCalendarResponse'
+        pay:
+          type: object
+          description: 'Pay data'
+          allOf:
+            - $ref: '#/components/schemas/ReportPayResponse'
+    CreateHolidayRequest:
+      type: object
+      required:
+        - year
+        - days
+      properties:
+        year:
+          type: integer
+          description: 'Holiday year'
+          example: 2024
+        days:
+          type: array
+          description: 'Holiday list'
+          items:
+            type: string
+            format: date
+            description: 'Holiday full date'
+            example: '2024-12-25'
+    CreateTimesheetRequest:
+      type: object
+      required:
+        - period
+      properties:
+        period:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/CreateTimesheetPeriodRequest'
+    CreateTimesheetPeriodRequest:
+      type: object
+      required:
+        - start
+        - end
+        - description
+      properties:
+        start:
+          type: string
+          description: 'Start of the day'
+          example: '08:30'
+        end:
+          type: string
+          description: 'End of the day'
+          example: '17:30'
+        description:
+          type: string
+          description: 'Description of the day'
+          example: 'Implement feature BHUT-2001'
+    CreateUserBalanceRequest:
+      type: object
+      required:
+        - date
+        - balance
+        - description
+      properties:
+        date:
+          type: string
+          description: 'Hour bank date'
+          example: '2024-08-25'
+        balance:
+          type: number
+          description: 'hour bank balance'
+          example: 10.70
+        description:
+          type: string
+          description: 'Hour bank description'
+          example: 'Lorem ipsum'
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - team
+        - hourValue
+        - hasBankHours
+        - contractTotal
+        - groupId
+        - startDate
+      properties:
+        name:
+          type: string
+          description: 'User name'
+          example: 'John Doe'
+        email:
+          type: string
+          description: 'User email'
+          example: 'email@domain.com'
+        password:
+          type: string
+          description: 'User password'
+          example: 'password@123'
+        team:
+          type: string
+          description: 'User team'
+          example: 'Bhut team'
+        hourValue:
+          type: number
+          description: 'User hour value'
+          example: 17.05
+        hasBankHours:
+          type: boolean
+          description: 'Define if user has bank hours'
+          example: true
+        contractTotal:
+          type: integer
+          description: 'User contract total hours'
+          example: 176
+        groupId:
+          type: string
+          description: 'User group identifier'
+          example: '6de140ca-ae94-4e1d-9c32-8de18fa22e45'
+        startDate:
+          type: string
+          description: 'User start date'
+          example: '2022-01-04'
+    CreateUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 'User identifier'
+          example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+    ListGroupResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Group identifier'
+          example: '6de140ca-ae94-4e1d-9c32-8de18fa22e45'
+        name:
+          type: string
+          description: 'Group name'
+          example: 'Developers'
+    ListHolidayResponse:
+      type: object
+      properties:
+        year:
+          type: integer
+          description: 'Holiday year'
+          example: 2024
+        days:
+          type: array
+          description: 'Holiday list'
+          items:
+            type: string
+            format: date
+            description: 'Holiday full date'
+            example: '2024-12-25'
+    ListUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 'User identifier'
+          example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+        name:
+          type: string
+          description: 'User name'
+          example: 'John Doe'
+        email:
+          type: string
+          description: 'User email'
+          example: 'email@domain.com'
+        team:
+          type: string
+          description: 'User team'
+          example: 'Bhut team'
+        hourValue:
+          type: number
+          description: 'User hour value'
+          example: 17.05
+        hasBankHours:
+          type: boolean
+          description: 'Define if user has bank hours'
+          example: true
+        totalBankHours:
+          type: number
+          description: 'User total bank hours'
+          example: 9.51
+        contractTotal:
+          type: integer
+          description: 'User contract total hours'
+          example: 176
+        groupId:
+          type: string
+          description: 'User group identifier'
+          example: '6de140ca-ae94-4e1d-9c32-8de18fa22e45'
+        groupName:
+          type: string
+          description: 'User group name'
+          example: 'Developer'
+    RecoverPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: 'user email'
+          example: 'email@domain.com'
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: 'Token for renew'
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+    ReportCalendarResponse:
+      type: object
+      properties:
+        month:
+          type: string
+          description: 'Report month'
+          example: '08'
+        year:
+          type: string
+          description: 'Report year'
+          example: '2024'
+        total:
+          type: string
+          description: 'Report total hours'
+          example: '176'
+    ReportDaysResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          description: 'Report days date'
+          example: '2024-08-30'
+        businessDay:
+          type: boolean
+          description: 'Defines whether it is a business day or not'
+          example: true
+        period:
+          type: array
+          description: 'Period data'
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ReportPeriodResponse'
+        total:
+          type: string
+          description: 'Total worked hours of the day'
+          example: '08:00'
+    ReportPayResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          description: 'Report pay date'
+          example: '2024-08-30'
+        hour:
+          type: number
+          description: 'Report hour date'
+          example: 10
+        total:
+          type: string
+          description: 'Total hours'
+          example: '176'
+    ReportPeriodResponse:
+      type: object
+      properties:
+        start:
+          type: string
+          description: 'Start of the day'
+          example: '08:30'
+        end:
+          type: string
+          description: 'End of the day'
+          example: '17:30'
+        description:
+          type: string
+          description: 'Description of the day'
+          example: 'Implement feature BHUT-2001'
+    ResourceAlreadyExistsResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - 'RESOURCE_ALREADY_EXISTS'
+              message:
+                type: string
+                example: 'Resource already exists'
+    ResourceNotFoundResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - 'RESOURCE_NOT_FOUND'
+              message:
+                type: string
+                example: 'Resource not found'
+    TimesheetResponse:
+      type: object
+      properties:
+        closed:
+          type: boolean
+          description: 'Defines if the report is closed or not'
+          example: true
+        month:
+          type: integer
+          description: 'Report month'
+          example: 08
+        year:
+          type: integer
+          description: 'Report year'
+          example: 2024
+        total:
+          type: string
+          description: 'Sum of report hours'
+          example: '176'
+        balance:
+          type: number
+          description: 'Hour balance'
+          example: 10.30
+        days:
+          type: array
+          description: 'Days data'
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ReportDaysResponse'
+    UpdateHolidayRequest:
+      type: object
+      required:
+        - days
+      properties:
+        days:
+          type: array
+          description: 'Holiday list'
+          items:
+            type: string
+            format: date
+            description: 'Holiday full date'
+            example: '2024-12-25'
+    UpdateUserPasswordRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          description: 'User password'
+          example: 'password@123'
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 'User name'
+          example: 'John Doe'
+        email:
+          type: string
+          description: 'User email'
+          example: 'email@domain.com'
+        team:
+          type: string
+          description: 'User team'
+          example: 'Bhut team'
+        hourValue:
+          type: number
+          description: 'User hour value'
+          example: 17.05
+        hasBankHours:
+          type: boolean
+          description: 'Define if user has bank hours'
+        contractTotal:
+          type: integer
+          description: 'User contract total hours'
+          example: 176
+        groupId:
+          type: string
+          description: 'User group identifier'
+          example: '6de140ca-ae94-4e1d-9c32-8de18fa22e45'
+        startDate:
+          type: string
+          description: 'User start date'
+          example: '2022-01-04'
+    UserReportResponse:
+      type: object
+      properties:
+        closed:
+          type: boolean
+          description: 'Defines if the report is closed or not'
+          example: true
+        month:
+          type: integer
+          description: 'Report month'
+          example: 08
+        year:
+          type: integer
+          description: 'Report year'
+          example: 2024
+        total:
+          type: string
+          description: 'Sum of report hours'
+          example: '176'
+        balance:
+          type: number
+          description: 'Hour balance'
+          example: 10.30
+        days:
+          type: array
+          description: 'Days data'
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ReportDaysResponse'
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 'User identifier'
+          example: 'd883fed5-49fb-435d-b719-e3ce0c8d7cf0'
+        name:
+          type: string
+          description: 'User name'
+          example: 'John Doe'
+        email:
+          type: string
+          description: 'User email'
+          example: 'email@domain.com'
+        team:
+          type: string
+          description: 'User team'
+          example: 'Bhut team'
+        hourValue:
+          type: number
+          description: 'User hour value'
+          example: 17.05
+        hasBankHours:
+          type: boolean
+          description: 'Define if user has bank hours'
+          example: true
+        totalBankHours:
+          type: number
+          description: 'User total bank hours'
+          example: 9.51
+        contractTotal:
+          type: integer
+          description: 'User contract total hours'
+          example: 176
+        groupId:
+          type: string
+          description: 'User group identifier'
+          example: '6de140ca-ae94-4e1d-9c32-8de18fa22e45'
+        groupName:
+          type: string
+          description: 'User group name'
+          example: 'Developer'
+        startDate:
+          type: string
+          description: 'User start date'
+          example: '2022-01-04'
+    ValidationErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - 'INVALID_FIELD'
+                  - 'INVALID_HEADER'
+              message:
+                type: string
+                example: 'Invalid/required fields'
+  securitySchemes:
+    JwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiAuth:
+      in: header
+      type: apiKey
+      name: X-Api-Key

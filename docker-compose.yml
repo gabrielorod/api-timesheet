@@ -1,15 +1,13 @@
 version: '3.8'
 
 services:
-  postgres:
-    container_name: api-timesheet-pg
-    image: 'postgres'
+  mongo:
+    container_name: api-timesheet-mongo
+    image: 'mongo'
     ports:
-      - "5432:5432"
+      - "27017:27017"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: docker
-      POSTGRES_GB: api-timesheet
-      PGDATA: /data/postgres
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
-      - ./data/pg:/data/postgres
+      - ./data/mongo:/data/db

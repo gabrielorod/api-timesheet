@@ -4,13 +4,15 @@ import {
   Controller,
   HttpCode,
   Post,
+  UseGuards,
   UsePipes,
 } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { PrismaService } from "../../database/prisma/prisma.service";
 import { hash } from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { ZodValidationPipe } from "../pipes/zod-validation-pipe";
+import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
 
 const createUserBodySchema = z.object({
   name: z.string(),
@@ -27,6 +29,7 @@ const createUserBodySchema = z.object({
 type CreateUserBodySchema = z.infer<typeof createUserBodySchema>;
 
 @Controller("/v1/user")
+@UseGuards(JwtAuthGuard)
 export class CreateUserController {
   constructor(private readonly prisma: PrismaService) {}
 

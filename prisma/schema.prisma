@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid()) @map("_id")
+  id            String   @id @default(uuid())
   id_group      String
   name          String
   email         String   @unique
@@ -19,28 +19,26 @@ model User {
   contractTotal Float
   startDate     DateTime
 
-  group            Group            @relation(fields: [id_group], references: [id])
-  bank_hours       BankHour[]
-  releases         Release[]
-  payments         Payment[]
-  recover_password RecoverPassword?
+  group           Group            @relation(fields: [id_group], references: [id])
+  bankHours       BankHour[]
+  releases        Release[]
+  payments        Payment[]
+  recoverPassword RecoverPassword?
 
   @@map("users")
 }
 
 model Resource {
-  id   String @id @default(uuid()) @map("_id")
-  name String
-
+  id              String          @id @default(uuid())
+  name            String
   resource_groups ResourceGroup[]
 
   @@map("resources")
 }
 
 model Group {
-  id   String @id @default(uuid()) @map("_id")
-  name String
-
+  id              String          @id @default(uuid())
+  name            String
   users           User[]
   resource_groups ResourceGroup[]
 
@@ -48,7 +46,7 @@ model Group {
 }
 
 model ResourceGroup {
-  id          String @id @default(uuid()) @map("_id")
+  id          String @id @default(uuid())
   id_resource String
   id_group    String
 
@@ -59,7 +57,7 @@ model ResourceGroup {
 }
 
 model RecoverPassword {
-  id      String @id @default(uuid()) @map("_id")
+  id      String @id @default(uuid())
   id_user String @unique
   code    String
 
@@ -69,7 +67,7 @@ model RecoverPassword {
 }
 
 model BankHour {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String   @id @default(uuid())
   id_user     String
   date        DateTime
   hour        DateTime
@@ -81,7 +79,7 @@ model BankHour {
 }
 
 model Release {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String   @id @default(uuid())
   id_user     String
   date        DateTime
   holiday     DateTime
@@ -96,7 +94,7 @@ model Release {
 }
 
 model Payment {
-  id                String   @id @default(uuid()) @map("_id")
+  id                String   @id @default(uuid())
   id_user           String
   month             Int
   year              Int
@@ -112,7 +110,7 @@ model Payment {
 }
 
 model Holiday {
-  id   String   @id @default(uuid()) @map("_id")
+  id   String   @id @default(uuid())
   year Int
   date DateTime
 

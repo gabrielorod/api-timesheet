@@ -1,12 +1,12 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { PrismaService } from "./database/prisma/prisma.service";
-import { CreateUserController } from "./http/controllers/create-user.controller";
-import { envSchema } from "./env/env";
-import { AuthModule } from "./auth/auth.modules";
-import { AuthenticateController } from "./http/controllers/authentication.controller";
-import { IsAliveController } from "./http/controllers/is-alive.controller";
-import { ApiManifestController } from "./http/controllers/api-manifest.controller";
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaService } from './database/prisma/prisma.service';
+import { CreateUserController } from './http/controllers/create-user.controller';
+import { envSchema } from './env/env';
+import { AuthModule } from './auth/auth.modules';
+import { AuthenticateController } from './http/controllers/authentication.controller';
+import { IsAliveController } from './http/controllers/is-alive.controller';
+import { ApiManifestController } from './http/controllers/api-manifest.controller';
 
 @Module({
   imports: [
@@ -16,12 +16,7 @@ import { ApiManifestController } from "./http/controllers/api-manifest.controlle
     }),
     AuthModule,
   ],
-  controllers: [
-    IsAliveController,
-    ApiManifestController,
-    CreateUserController,
-    AuthenticateController,
-  ],
+  controllers: [IsAliveController, ApiManifestController, CreateUserController, AuthenticateController],
   providers: [PrismaService],
 })
 export class AppModule {}

@@ -62,7 +62,7 @@ $ pnpm run test:cov
 
 ```bash
 # Generate migration
-$ pnpm prisma migrate dev
+$ pnpm run migrate
 
 # Start prisma studio in your localhost
 $ pnpm prisma studio

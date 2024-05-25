@@ -1,10 +1,10 @@
-import { Controller, Get, HttpCode } from "@nestjs/common";
+import { Controller, Get, HttpCode } from '@nestjs/common';
 
 @Controller()
 export class IsAliveController {
-  @Get("/is-alive")
+  @Get('/is-alive')
   @HttpCode(200)
   async handle() {
-    return "OK!";
+    return 'OK!';
   }
 }

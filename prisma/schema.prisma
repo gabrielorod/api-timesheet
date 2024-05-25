@@ -8,10 +8,113 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  name     String
-  email    String @unique
-  password String
+  id            String   @id @default(uuid()) @map("_id")
+  id_group      String
+  name          String
+  email         String   @unique
+  password      String
+  team          String
+  hourValue     Float
+  hasBankHours  Boolean
+  contractTotal Float
+  startDate     DateTime
+
+  group            Group            @relation(fields: [id_group], references: [id])
+  bank_hours       BankHour[]
+  releases         Release[]
+  payments         Payment[]
+  recover_password RecoverPassword?
 
   @@map("users")
+}
+
+model Resource {
+  id   String @id @default(uuid()) @map("_id")
+  name String
+
+  resource_groups ResourceGroup[]
+
+  @@map("resources")
+}
+
+model Group {
+  id   String @id @default(uuid()) @map("_id")
+  name String
+
+  users           User[]
+  resource_groups ResourceGroup[]
+
+  @@map("groups")
+}
+
+model ResourceGroup {
+  id          String @id @default(uuid()) @map("_id")
+  id_resource String
+  id_group    String
+
+  resource Resource @relation(fields: [id_resource], references: [id])
+  group    Group    @relation(fields: [id_group], references: [id])
+
+  @@map("resource_groups")
+}
+
+model RecoverPassword {
+  id      String @id @default(uuid()) @map("_id")
+  id_user String @unique
+  code    String
+
+  user User @relation(fields: [id_user], references: [id])
+
+  @@map("recover_passwords")
+}
+
+model BankHour {
+  id          String   @id @default(uuid()) @map("_id")
+  id_user     String
+  date        DateTime
+  hour        DateTime
+  description String
+
+  user User @relation(fields: [id_user], references: [id])
+
+  @@map("bank_hours")
+}
+
+model Release {
+  id          String   @id @default(uuid()) @map("_id")
+  id_user     String
+  date        DateTime
+  holiday     DateTime
+  start_hour  DateTime
+  end_hour    DateTime
+  total       String
+  description String
+
+  user User @relation(fields: [id_user], references: [id])
+
+  @@map("releases")
+}
+
+model Payment {
+  id                String   @id @default(uuid()) @map("_id")
+  id_user           String
+  month             Int
+  year              Int
+  total_hours       Float
+  payment_date      DateTime
+  hour_value        Float
+  total_value       Float
+  current_time_bank Float
+
+  user User @relation(fields: [id_user], references: [id])
+
+  @@map("payments")
+}
+
+model Holiday {
+  id   String   @id @default(uuid()) @map("_id")
+  year Int
+  date DateTime
+
+  @@map("holidays")
 }

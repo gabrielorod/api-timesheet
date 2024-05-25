@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.modules';
 import { AuthenticateController } from './http/controllers/authentication.controller';
 import { IsAliveController } from './http/controllers/is-alive.controller';
 import { ApiManifestController } from './http/controllers/api-manifest.controller';
+import { ListUserController } from './http/controllers/list-user.controller';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { ApiManifestController } from './http/controllers/api-manifest.controlle
     }),
     AuthModule,
   ],
-  controllers: [IsAliveController, ApiManifestController, CreateUserController, AuthenticateController],
+  controllers: [IsAliveController, ApiManifestController, CreateUserController, AuthenticateController, ListUserController],
   providers: [PrismaService],
 })
 export class AppModule {}

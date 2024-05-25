@@ -20,12 +20,12 @@ const createUserBodySchema = z.object({
 
 type CreateUserBodySchema = z.infer<typeof createUserBodySchema>;
 
-@Controller('/v1/user')
+@Controller('/v1')
 @UseGuards(JwtAuthGuard)
 export class CreateUserController {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Post()
+  @Post('/user')
   @HttpCode(200)
   @UsePipes(new ZodValidationPipe(createUserBodySchema))
   async handle(@Body() body: CreateUserBodySchema): Promise<any> {

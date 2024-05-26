@@ -9,4 +9,8 @@ export class DateValidator {
   public static timestampNumber(date: Date): string {
     return format(parseISO(this.getFnsTmz(date)), 'yyyyMMddHHmmssSSS');
   }
+
+  public static dateToStrBR(date: Date): string {
+    return format(date, 'dd/MM/yyyy');
+  }
 }

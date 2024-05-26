@@ -8,6 +8,8 @@ import { AuthenticateController } from './http/controllers/authentication.contro
 import { IsAliveController } from './http/controllers/is-alive.controller';
 import { ApiManifestController } from './http/controllers/api-manifest.controller';
 import { ListUserController } from './http/controllers/list-user.controller';
+import { ListGroupController } from './http/controllers/list-group.controller';
+import { ListHolidayController } from './http/controllers/list-holiday.controller';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { ListUserController } from './http/controllers/list-user.controller';
     }),
     AuthModule,
   ],
-  controllers: [IsAliveController, ApiManifestController, CreateUserController, AuthenticateController, ListUserController],
+  controllers: [IsAliveController, ApiManifestController, CreateUserController, AuthenticateController, ListUserController, ListGroupController, ListHolidayController],
   providers: [PrismaService],
 })
 export class AppModule {}

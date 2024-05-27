@@ -8,7 +8,7 @@ import { DateValidator } from '../../utils/DateValidator';
 export class ListHolidayController {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Get('/holiday')
+  @Get('holiday')
   async handle() {
     const holidays = await this.prisma.holiday.findMany({
       select: {

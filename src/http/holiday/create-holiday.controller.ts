@@ -20,7 +20,7 @@ type CreateHolidayBodySchema = z.infer<typeof createHolidayBodySchema>;
 export class CreateHolidayController {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Post('/holiday')
+  @Post('holiday')
   @HttpCode(204)
   @UsePipes(new ZodValidationPipe(createHolidayBodySchema))
   async handle(@Body() body: CreateHolidayBodySchema): Promise<void> {

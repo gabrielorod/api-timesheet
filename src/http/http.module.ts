@@ -11,9 +11,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuthRefreshTokenController } from './auth/auth-refresh-token.controller';
 import { AuthRecoverPasswordController } from './auth/auth-recover-password.controller';
 import { AuthChangePasswordController } from './auth/auth-change-password.controller';
+import { UpdateUserPasswordController } from './users/update-user-password.controller';
+import { GetUserByIdController } from './users/get-user-by-id.controller';
 
 @Module({
-  controllers: [IsAliveController, ApiManifestController, AuthTokenController, AuthRefreshTokenController, AuthRecoverPasswordController, AuthChangePasswordController, CreateUserController, ListUserController, ListGroupController, ListHolidayController, CreateHolidayController],
+  controllers: [IsAliveController, ApiManifestController, AuthTokenController, AuthRefreshTokenController, AuthRecoverPasswordController, AuthChangePasswordController, CreateUserController, ListUserController, GetUserByIdController, UpdateUserPasswordController, ListGroupController, ListHolidayController, CreateHolidayController],
   providers: [PrismaService],
 })
 export class HttpModule {}

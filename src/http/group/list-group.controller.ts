@@ -7,7 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class ListGroupController {
   constructor(private prisma: PrismaService) {}
 
-  @Get('/group')
+  @Get('group')
   async handle() {
     return this.prisma.group.findMany();
   }

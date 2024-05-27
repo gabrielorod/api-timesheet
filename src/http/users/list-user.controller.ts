@@ -7,7 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class ListUserController {
   constructor(private prisma: PrismaService) {}
 
-  @Get('/user')
+  @Get('user')
   async handle() {
     const users = await this.prisma.user.findMany({
       orderBy: {

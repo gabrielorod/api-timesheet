@@ -25,7 +25,7 @@ type CreateUserBodySchema = z.infer<typeof createUserBodySchema>;
 export class CreateUserController {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Post('/user')
+  @Post('user')
   @HttpCode(200)
   @UsePipes(new ZodValidationPipe(createUserBodySchema))
   async handle(@Body() body: CreateUserBodySchema): Promise<any> {

@@ -1,6 +1,6 @@
-import { BadRequestException, Body, Controller, Post, Put, UnauthorizedException, UsePipes } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException, UsePipes } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare, hash } from 'bcryptjs';
+import { compare } from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
@@ -12,14 +12,6 @@ const authenticateBodySchema = z.object({
 
 type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>;
 
-const putRecoverPasswordSchema = z.object({
-  hash: z.string().uuid(),
-  code: z.string().length(5),
-  password: z.string().min(8).max(32),
-});
-
-type PutRecoverPasswordBody = z.infer<typeof putRecoverPasswordSchema>;
-
 @Controller('/v1/auth')
 export class AuthTokenController {
   constructor(
@@ -27,7 +19,7 @@ export class AuthTokenController {
     private jwt: JwtService,
   ) {}
 
-  @Post('/token')
+  @Post('token')
   @UsePipes(new ZodValidationPipe(authenticateBodySchema))
   async login(@Body() body: AuthenticateBodySchema) {
     const { email, password } = body;
@@ -60,40 +52,9 @@ export class AuthTokenController {
     };
   }
 
-  @Put('/recover-password')
-  @UsePipes(new ZodValidationPipe(putRecoverPasswordSchema))
-  async resetPassword(@Body() body: PutRecoverPasswordBody) {
-    const { hash, code, password } = body;
-
-    const recoverPassword = await this.prisma.recoverPassword.findUnique({
-      where: { id: hash },
-    });
-
-    if (!recoverPassword) {
-      throw new BadRequestException('Invalid fields.');
-    }
-
-    if (code !== recoverPassword.code) {
-      throw new BadRequestException('Invalid fields.');
-    }
-
-    const hashedPassword = await this.generateHash(password);
-
-    await this.prisma.user.update({
-      where: { id: recoverPassword.id_user },
-      data: { password: hashedPassword },
-    });
-
-    await this.prisma.recoverPassword.delete({ where: { id: recoverPassword.id } });
-  }
-
-  private async generateHash(password: string): Promise<string> {
-    return await hash(password, 8);
-  }
-
   private generateAccessToken(userId: string): string {
     const payload = { sub: userId };
-    return this.jwt.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: '24H' });
+    return this.jwt.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: '24h' });
   }
 
   private generateRefreshToken(userId: string): string {

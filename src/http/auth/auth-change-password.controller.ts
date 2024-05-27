@@ -16,7 +16,7 @@ type PutRecoverPasswordBody = z.infer<typeof putRecoverPasswordSchema>;
 export class AuthChangePasswordController {
   constructor(private prisma: PrismaService) {}
 
-  @Put('/recover-password')
+  @Put('recover-password')
   @UsePipes(new ZodValidationPipe(putRecoverPasswordSchema))
   async resetPassword(@Body() body: PutRecoverPasswordBody) {
     const { hash, code, password } = body;

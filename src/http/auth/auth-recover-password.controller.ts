@@ -14,7 +14,7 @@ type PostRecoverPasswordBody = z.infer<typeof postRecoverPasswordSchema>;
 export class AuthRecoverPasswordController {
   constructor(private prisma: PrismaService) {}
 
-  @Post('/recover-password')
+  @Post('recover-password')
   @HttpCode(204)
   @UsePipes(new ZodValidationPipe(postRecoverPasswordSchema))
   async initiatePasswordReset(@Body() body: PostRecoverPasswordBody) {

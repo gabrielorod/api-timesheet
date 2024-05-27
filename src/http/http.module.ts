@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { IsAliveController } from './controllers/is-alive.controller';
-import { ApiManifestController } from './controllers/api-manifest.controller';
-import { CreateUserController } from './controllers/create-user.controller';
-import { AuthenticateController } from './controllers/authentication.controller';
-import { ListUserController } from './controllers/list-user.controller';
-import { ListGroupController } from './controllers/list-group.controller';
-import { ListHolidayController } from './controllers/list-holiday.controller';
-import { CreateHolidayController } from './controllers/create-holiday.controller';
+import { IsAliveController } from './api/is-alive.controller';
+import { ApiManifestController } from './api/api-manifest.controller';
+import { CreateUserController } from './users/create-user.controller';
+import { AuthenticateController } from './auth/authentication.controller';
+import { ListUserController } from './users/list-user.controller';
+import { ListGroupController } from './group/list-group.controller';
+import { ListHolidayController } from './holiday/list-holiday.controller';
+import { CreateHolidayController } from './holiday/create-holiday.controller';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Module({

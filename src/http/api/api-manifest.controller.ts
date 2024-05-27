@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode } from '@nestjs/common';
-import { DateValidator } from '../../../api/utils/DateValidator';
-import packageJson from '../../../../package.json';
+import { DateValidator } from '../../utils/DateValidator';
+import packageJson from '../../../package.json';
 
 @Controller()
 export class ApiManifestController {

@@ -1,9 +1,10 @@
-import { Body, Controller, Post, UnauthorizedException, UsePipes } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, Post, Put, UnauthorizedException, UsePipes } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 
 const authenticateBodySchema = z.object({
   email: z.string().email(),
@@ -17,6 +18,20 @@ const refreshTokenBodySchema = z.object({
 });
 
 type RefreshTokenBodySchema = z.infer<typeof refreshTokenBodySchema>;
+
+const postRecoverPasswordSchema = z.object({
+  email: z.string(),
+});
+
+type PostRecoverPasswordBody = z.infer<typeof postRecoverPasswordSchema>;
+
+const putRecoverPasswordSchema = z.object({
+  hash: z.string().uuid(),
+  code: z.string().length(5),
+  password: z.string().min(8).max(32),
+});
+
+type PutRecoverPasswordBody = z.infer<typeof putRecoverPasswordSchema>;
 
 @Controller('/v1/auth')
 export class AuthenticateController {
@@ -78,6 +93,62 @@ export class AuthenticateController {
       tokenType: 'Bearer',
       expiresIn: expiresIn,
     };
+  }
+
+  @Post('/recover-password')
+  @HttpCode(204)
+  @UsePipes(new ZodValidationPipe(postRecoverPasswordSchema))
+  async initiatePasswordReset(@Body() body: PostRecoverPasswordBody) {
+    const { email } = body;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid field.');
+    }
+
+    const code = Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+
+    await this.prisma.recoverPassword.create({
+      data: {
+        id: uuidv4(),
+        id_user: user.id,
+        code: String(code),
+      },
+    });
+  }
+
+  @Put('/recover-password')
+  @UsePipes(new ZodValidationPipe(putRecoverPasswordSchema))
+  async resetPassword(@Body() body: PutRecoverPasswordBody) {
+    const { hash, code, password } = body;
+
+    const recoverPassword = await this.prisma.recoverPassword.findUnique({
+      where: { id: hash },
+    });
+
+    if (!recoverPassword) {
+      throw new BadRequestException('Invalid fields.');
+    }
+
+    if (code !== recoverPassword.code) {
+      throw new BadRequestException('Invalid fields.');
+    }
+
+    const hashedPassword = await this.generateHash(password);
+
+    await this.prisma.user.update({
+      where: { id: recoverPassword.id_user },
+      data: { password: hashedPassword },
+    });
+
+    await this.prisma.recoverPassword.delete({ where: { id: recoverPassword.id } });
+  }
+
+  private async generateHash(password: string): Promise<string> {
+    return await hash(password, 8);
   }
 
   private generateAccessToken(userId: string): string {

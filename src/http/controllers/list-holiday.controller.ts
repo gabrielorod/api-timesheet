@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { PrismaService } from '../../database/prisma/prisma.service';
-import { DateValidator } from '../../api/utils/DateValidator';
+import { PrismaService } from '../../prisma/prisma.service';
+import { DateValidator } from '../../../api/utils/DateValidator';
 
 @Controller('/v1')
 @UseGuards(JwtAuthGuard)

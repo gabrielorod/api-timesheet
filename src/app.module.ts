@@ -1,15 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaService } from './database/prisma/prisma.service';
-import { CreateUserController } from './http/controllers/create-user.controller';
-import { envSchema } from './env/env';
+import { envSchema } from './env';
 import { AuthModule } from './auth/auth.modules';
-import { AuthenticateController } from './http/controllers/authentication.controller';
-import { IsAliveController } from './http/controllers/is-alive.controller';
-import { ApiManifestController } from './http/controllers/api-manifest.controller';
-import { ListUserController } from './http/controllers/list-user.controller';
-import { ListGroupController } from './http/controllers/list-group.controller';
-import { ListHolidayController } from './http/controllers/list-holiday.controller';
+import { HttpModule } from './http/http.module';
 
 @Module({
   imports: [
@@ -18,8 +11,7 @@ import { ListHolidayController } from './http/controllers/list-holiday.controlle
       isGlobal: true,
     }),
     AuthModule,
+    HttpModule,
   ],
-  controllers: [IsAliveController, ApiManifestController, CreateUserController, AuthenticateController, ListUserController, ListGroupController, ListHolidayController],
-  providers: [PrismaService],
 })
 export class AppModule {}

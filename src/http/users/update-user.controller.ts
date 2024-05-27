@@ -1,11 +1,17 @@
 import { BadRequestException, Body, Controller, Param, Put, UsePipes } from '@nestjs/common';
-import { hash } from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
 
 const changeUserPasswordBody = z.object({
-  password: z.string().min(8).max(32),
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+  team: z.string().optional(),
+  hourValue: z.number().optional(),
+  hasBankHours: z.boolean().optional(),
+  contractTotal: z.number().optional(),
+  groupId: z.string().uuid().optional(),
+  startDate: z.string().optional(),
 });
 
 type ChangeUserPasswordBody = z.infer<typeof changeUserPasswordBody>;
@@ -14,10 +20,10 @@ type ChangeUserPasswordBody = z.infer<typeof changeUserPasswordBody>;
 export class UpdateUserPasswordController {
   constructor(private prisma: PrismaService) {}
 
-  @Put(':id/password')
+  @Put(':id')
   @UsePipes(new ZodValidationPipe(changeUserPasswordBody))
   async updateUserPassword(@Body() body: ChangeUserPasswordBody, @Param('id') id: string) {
-    const { password } = body;
+    const { name, email, team, hourValue, hasBankHours, contractTotal, groupId, startDate } = body;
 
     const findUser = await this.prisma.user.findUnique({
       where: { id: id },
@@ -27,15 +33,18 @@ export class UpdateUserPasswordController {
       throw new BadRequestException('Invalid fields.');
     }
 
-    const hashedPassword = await this.generateHash(password);
-
     await this.prisma.user.update({
       where: { id: id },
-      data: { password: hashedPassword },
+      data: {
+        name,
+        email,
+        team,
+        hourValue,
+        hasBankHours,
+        contractTotal,
+        id_group: groupId,
+        startDate,
+      },
     });
-  }
-
-  private async generateHash(password: string): Promise<string> {
-    return await hash(password, 8);
   }
 }

@@ -23,10 +23,12 @@ $ pnpm install
 # development
 $ pnpm run start
 ```
+
 ```bash
 # watch mode
 $ pnpm run start:dev
 ```
+
 ```bash
 # production mode
 $ pnpm run start:prod
@@ -38,6 +40,7 @@ $ pnpm run start:prod
 # unit tests
 $ pnpm run test
 ```
+
 ```bash
 # e2e tests
 $ pnpm run test:e2e
@@ -49,10 +52,12 @@ $ pnpm run test:e2e
 # permission
 $ sudo chmod -R 777 *
 ```
+
 ```bash
 # run lint
 $ pnpm run lint
 ```
+
 ```bash
 # run format
 $ pnpm run format
@@ -64,6 +69,7 @@ $ pnpm run format
 # Generate migration
 $ pnpm run migrate
 ```
+
 ```bash
 # Start prisma studio in your localhost
 $ pnpm prisma studio

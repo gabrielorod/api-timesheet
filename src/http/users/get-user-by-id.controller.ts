@@ -1,12 +1,17 @@
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
+import { BadRequestException, Controller, ForbiddenException, Get, Param } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CurrentUser } from '../../auth/current-user-decorator';
 
 @Controller('/v1/user')
 export class GetUserByIdController {
   constructor(private prisma: PrismaService) {}
 
   @Get(':id')
-  async userById(@Param('id') id: string) {
+  async userById(@Param('id') id: string, @CurrentUser() jwt: { resources: string[] }) {
+    if (!jwt.resources.includes('GET_USER')) {
+      throw new ForbiddenException('Access denied');
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: id },
     });

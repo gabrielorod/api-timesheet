@@ -1,6 +1,7 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CurrentUser } from '../../auth/current-user-decorator';
 
 @Controller('/v1')
 @UseGuards(JwtAuthGuard)
@@ -8,7 +9,11 @@ export class ListUserController {
   constructor(private prisma: PrismaService) {}
 
   @Get('user')
-  async handle() {
+  async handle(@CurrentUser() jwt: { resources: string[] }) {
+    if (!jwt.resources.includes('GET_USERS')) {
+      throw new ForbiddenException('Access denied');
+    }
+
     const users = await this.prisma.user.findMany({
       orderBy: {
         team: 'desc',

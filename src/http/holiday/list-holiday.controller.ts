@@ -1,7 +1,8 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DateValidator } from '../../utils/DateValidator';
+import { CurrentUser } from '../../auth/current-user-decorator';
 
 @Controller('/v1')
 @UseGuards(JwtAuthGuard)
@@ -9,7 +10,11 @@ export class ListHolidayController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get('holiday')
-  async handle() {
+  async handle(@CurrentUser() jwt: { resources: string[] }) {
+    if (!jwt.resources.includes('GET_HOLIDAY')) {
+      throw new ForbiddenException('Access denied');
+    }
+
     const holidays = await this.prisma.holiday.findMany({
       select: {
         year: true,

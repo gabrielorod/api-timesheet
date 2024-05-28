@@ -9,7 +9,6 @@ import { CurrentUser } from '../../auth/current-user-decorator';
 // esquema de validação usando o Zod.
 const createHolidayBodySchema = z.object({
   year: z.number(),
-  // Deve ser um número.
   days: z.array(z.string().transform((str) => new Date(str))),
   // Deve ser um array de strings que serão convertidos para objetos Date.
 });

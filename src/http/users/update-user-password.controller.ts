@@ -1,9 +1,10 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Param, Put, UsePipes } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Param, Put, UseGuards, UsePipes } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
 import { CurrentUser } from '../../auth/current-user-decorator';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 const changeUserPasswordBody = z.object({
   password: z.string().min(8).max(32),
@@ -12,6 +13,7 @@ const changeUserPasswordBody = z.object({
 type ChangeUserPasswordBody = z.infer<typeof changeUserPasswordBody>;
 
 @Controller('/v1/user')
+@UseGuards(JwtAuthGuard)
 export class UpdateUserPasswordController {
   constructor(private prisma: PrismaService) {}
 

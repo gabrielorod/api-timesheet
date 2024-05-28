@@ -4,11 +4,11 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CurrentUser } from '../../auth/current-user-decorator';
 
 @Controller('/v1')
+@UseGuards(JwtAuthGuard)
 export class ListGroupController {
   constructor(private prisma: PrismaService) {}
 
   @Get('group')
-  @UseGuards(JwtAuthGuard)
   async handle(@CurrentUser() jwt: { resources: string[] }) {
     if (!jwt.resources.includes('GET_GROUP')) {
       throw new ForbiddenException('Access denied');

@@ -1,8 +1,10 @@
-import { BadRequestException, Controller, ForbiddenException, Get, Param } from '@nestjs/common';
+import { BadRequestException, Controller, ForbiddenException, Get, Param, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user-decorator';
 
 @Controller('/v1/user')
+@UseGuards(JwtAuthGuard)
 export class GetUserByIdController {
   constructor(private prisma: PrismaService) {}
 

@@ -2,6 +2,7 @@ import { Body, Controller, Post, UnauthorizedException, UsePipes } from '@nestjs
 import { JwtService } from '@nestjs/jwt';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
+import { PrismaService } from '../../prisma/prisma.service';
 
 const refreshTokenBodySchema = z.object({
   refreshToken: z.string(),
@@ -11,7 +12,10 @@ type RefreshTokenBodySchema = z.infer<typeof refreshTokenBodySchema>;
 
 @Controller('/v1/auth')
 export class AuthRefreshTokenController {
-  constructor(private jwt: JwtService) {}
+  constructor(
+    private jwt: JwtService,
+    private prisma: PrismaService,
+  ) {}
 
   @Post('/refresh-token')
   @UsePipes(new ZodValidationPipe(refreshTokenBodySchema))
@@ -24,7 +28,39 @@ export class AuthRefreshTokenController {
       throw new UnauthorizedException('Invalid refresh token.');
     }
 
-    const accessToken = this.generateAccessToken(userId);
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found.');
+    }
+
+    const resources = await this.prisma.resource.findMany({
+      where: {
+        resource_groups: {
+          some: {
+            id_group: user.id_group,
+          },
+        },
+      },
+      select: {
+        name: true,
+      },
+    });
+
+    const resourceNames = resources.map((resource) => resource.name);
+
+    const payload = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      team: user.team,
+      groupId: user.id_group,
+      resources: resourceNames,
+    };
+
+    const accessToken = this.generateAccessToken(payload);
     const expiresIn = this.jwt.decode(accessToken).exp - Math.floor(Date.now() / 1000);
 
     return {
@@ -34,15 +70,15 @@ export class AuthRefreshTokenController {
       expiresIn: expiresIn,
     };
   }
-  private generateAccessToken(userId: string): string {
-    const payload = { sub: userId };
-    return this.jwt.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: '24H' });
+
+  private generateAccessToken(payload: object): string {
+    return this.jwt.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: '7d' });
   }
 
   private async verifyRefreshToken(token: string): Promise<string | null> {
     try {
       const decoded = this.jwt.verify(token, { secret: process.env.JWT_REFRESH_SECRET });
-      return decoded.sub;
+      return decoded.id;
     } catch (error) {
       return null;
     }

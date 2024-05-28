@@ -25,9 +25,7 @@ export class AuthTokenController {
     const { email, password } = body;
 
     const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
+      where: { email },
     });
 
     if (!user) {
@@ -40,8 +38,32 @@ export class AuthTokenController {
       throw new UnauthorizedException('User credentials do not match.');
     }
 
-    const accessToken = this.generateAccessToken(user.id);
-    const refreshToken = this.generateRefreshToken(user.id);
+    const resources = await this.prisma.resource.findMany({
+      where: {
+        resource_groups: {
+          some: {
+            id_group: user.id_group,
+          },
+        },
+      },
+      select: {
+        name: true,
+      },
+    });
+
+    const resourceNames = resources.map((resource) => resource.name);
+
+    const payload = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      team: user.team,
+      groupId: user.id_group,
+      resources: resourceNames,
+    };
+
+    const accessToken = this.generateAccessToken(payload);
+    const refreshToken = this.generateRefreshToken(payload);
     const expiresIn = this.jwt.decode(accessToken).exp - Math.floor(Date.now() / 1000);
 
     return {
@@ -52,13 +74,11 @@ export class AuthTokenController {
     };
   }
 
-  private generateAccessToken(userId: string): string {
-    const payload = { sub: userId };
+  private generateAccessToken(payload: object): string {
     return this.jwt.sign(payload, { secret: process.env.JWT_SECRET, expiresIn: '24h' });
   }
 
-  private generateRefreshToken(userId: string): string {
-    const payload = { sub: userId };
+  private generateRefreshToken(payload: object): string {
     return this.jwt.sign(payload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' });
   }
 }

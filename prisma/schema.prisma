@@ -83,8 +83,8 @@ model Release {
   id_user     String
   date        DateTime
   holiday     DateTime
-  start_hour  DateTime
-  end_hour    DateTime
+  start_hour  String
+  end_hour    String
   total       String
   description String
 

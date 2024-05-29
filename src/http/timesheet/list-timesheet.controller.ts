@@ -68,8 +68,6 @@ export class ListTimesheetController {
       return acc;
     }, {});
 
-    console.log('Grouped Periods:', groupedPeriods); // Log para verificar os períodos agrupados
-
     // Mapear os dias com os períodos agrupados
     const days = Object.keys(groupedPeriods).map((date) => {
       const dayPeriods = groupedPeriods[date];

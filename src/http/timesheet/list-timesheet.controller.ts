@@ -74,7 +74,7 @@ export class ListTimesheetController {
       const dayPeriod = filteredPeriods.find((period) => period.date.toISOString().split('T')[0] === date);
       return {
         date: date,
-        businessDay: !dayPeriod?.holiday, // Assuming holiday means it's not a business day
+        businessDay: !dayPeriod?.holiday,
         period: dayPeriods,
         total: dayPeriod?.total,
       };

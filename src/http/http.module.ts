@@ -17,9 +17,10 @@ import { CreateTimesheetController } from './timesheet/create-timesheet.controll
 import { UserBankController } from './users/user-bank.controller';
 import { ListTimesheetController } from './timesheet/list-timesheet.controller';
 import { GetExistentUserReportController } from './users/get-existent-user-report.controller';
+import { CloseUserReportController } from './users/close-user-report.controller';
 
 @Module({
-  controllers: [IsAliveController, ApiManifestController, AuthTokenController, AuthRefreshTokenController, AuthRecoverPasswordController, AuthChangePasswordController, CreateUserController, ListUserController, GetExistentUserReportController, GetUserByIdController, UpdateUserPasswordController, UserBankController, ListGroupController, ListHolidayController, CreateHolidayController, CreateTimesheetController, ListTimesheetController],
+  controllers: [IsAliveController, ApiManifestController, AuthTokenController, AuthRefreshTokenController, AuthRecoverPasswordController, AuthChangePasswordController, CreateUserController, ListUserController, CloseUserReportController, GetExistentUserReportController, GetUserByIdController, UpdateUserPasswordController, UserBankController, ListGroupController, ListHolidayController, CreateHolidayController, CreateTimesheetController, ListTimesheetController],
   providers: [PrismaService],
 })
 export class HttpModule {}

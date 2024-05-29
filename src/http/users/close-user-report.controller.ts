@@ -19,8 +19,8 @@ export class CloseUserReportController {
     const userPayment = await this.prisma.payment.findFirst({
       where: {
         id_user: id,
-        month: month,
-        year: year,
+        month: Number(month),
+        year: Number(year),
       },
     });
 
@@ -61,8 +61,8 @@ export class CloseUserReportController {
       data: {
         id: uuidv4(),
         id_user: user?.id ?? id,
-        year: year,
-        month: month,
+        year: Number(year),
+        month: Number(month),
         total_hours: Number(totalHours),
         total_value: totalValue,
         hour_value: Number(user?.hourValue),

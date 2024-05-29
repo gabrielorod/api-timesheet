@@ -66,12 +66,13 @@ async function seed() {
       { id: '3e9d7c8c-bd8a-4ed4-a6cb-7f8a1d4b1d34', name: 'PUT_HOLIDAY' },
       { id: '4f9d7d8d-bd9b-4ed5-a7cc-8f9b1e5c2d45', name: 'GET_HOLIDAYS' },
       { id: '5f9d7e8e-bdac-4ed6-a8cd-90fc1f6d3d56', name: 'POST_TIMESHEET' },
-      { id: '6f9d7f8f-bdbd-4ed7-a9ce-a10d1f7d4d67', name: 'GET_TIMESHEET' }, //
+      { id: '6f9d7f8f-bdbd-4ed7-a9ce-a10d1f7d4d67', name: 'GET_TIMESHEET' },
       { id: '7f9d8080-bdce-4ed8-aadf-b21e1f8d5d78', name: 'POST_USER' },
       { id: '8f9d8181-bddf-4ed9-abf0-c32f1f9d6d89', name: 'PUT_USER' },
-      { id: '9f9d8282-bdf0-4eda-ac01-d43f1f0d7e90', name: 'PUT_USER_PASSWORD' }, //
-      { id: 'af9d8383-be01-4edb-ad12-e54f1f1d8f01', name: 'GET_USER' }, //
+      { id: '9f9d8282-bdf0-4eda-ac01-d43f1f0d7e90', name: 'PUT_USER_PASSWORD' },
+      { id: 'af9d8383-be01-4edb-ad12-e54f1f1d8f01', name: 'GET_USER' },
       { id: 'bf9d8484-be12-4edc-ae23-f65f1f2d9f12', name: 'GET_USERS' },
+      { id: 'f459a4fe-ec94-4ed2-b5ea-c301cc58cc2a', name: 'PATCH_USER' },
     ];
 
     for (const resource of resources) {
@@ -104,6 +105,8 @@ async function seed() {
       { id: '9eb94e21-33d2-4f22-a985-1c672f601ee7', id_resource: 'af9d8383-be01-4edb-ad12-e54f1f1d8f01', id_group: '87137be5-712f-4964-bcdb-c38f0d1751ac' },
       { id: '74838ab7-d89f-495d-aa15-f86e87034006', id_resource: 'af9d8383-be01-4edb-ad12-e54f1f1d8f01', id_group: 'b6fa2f70-0abc-4576-97db-40fe32838431' },
       { id: 'dc9607c6-3e77-474d-bf01-e597e7af607d', id_resource: 'bf9d8484-be12-4edc-ae23-f65f1f2d9f12', id_group: '87137be5-712f-4964-bcdb-c38f0d1751ac' },
+      { id: 'a9e17d2b-2066-4acc-a17a-4e1e60c799cf', id_resource: 'f459a4fe-ec94-4ed2-b5ea-c301cc58cc2a', id_group: '87137be5-712f-4964-bcdb-c38f0d1751ac' },
+      { id: 'f3babc47-2d90-4e95-8708-f9b8064a7dbc', id_resource: 'f459a4fe-ec94-4ed2-b5ea-c301cc58cc2a', id_group: 'b6fa2f70-0abc-4576-97db-40fe32838431' },
     ];
 
     for (const resourceGroup of resourceGroups) {

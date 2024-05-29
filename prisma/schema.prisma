@@ -68,9 +68,9 @@ model RecoverPassword {
 
 model BankHour {
   id          String   @id @default(uuid())
-  id_user     String
+  id_user     String   @unique
   date        DateTime
-  hour        DateTime
+  hour        Float
   description String
 
   user User @relation(fields: [id_user], references: [id])

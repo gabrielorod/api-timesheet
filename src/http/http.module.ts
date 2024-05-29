@@ -14,9 +14,10 @@ import { AuthChangePasswordController } from './auth/auth-change-password.contro
 import { UpdateUserPasswordController } from './users/update-user-password.controller';
 import { GetUserByIdController } from './users/get-user-by-id.controller';
 import { CreateTimesheetController } from './timesheet/create-timesheet.controller';
+import { UserBankController } from './users/user-bank.controller';
 
 @Module({
-  controllers: [IsAliveController, ApiManifestController, AuthTokenController, AuthRefreshTokenController, AuthRecoverPasswordController, AuthChangePasswordController, CreateUserController, ListUserController, GetUserByIdController, UpdateUserPasswordController, ListGroupController, ListHolidayController, CreateHolidayController, CreateTimesheetController],
+  controllers: [IsAliveController, ApiManifestController, AuthTokenController, AuthRefreshTokenController, AuthRecoverPasswordController, AuthChangePasswordController, CreateUserController, ListUserController, GetUserByIdController, UpdateUserPasswordController, UserBankController, ListGroupController, ListHolidayController, CreateHolidayController, CreateTimesheetController],
   providers: [PrismaService],
 })
 export class HttpModule {}

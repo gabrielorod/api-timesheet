@@ -1,7 +1,6 @@
-import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, Param, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { z } from 'zod';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user-decorator';
 import { differenceInHours } from 'date-fns';
@@ -10,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 const createTimesheetBodySchema = z.object({
   period: z.array(
     z.object({
+      id: z.string().optional(),
       start: z.string(),
       end: z.string(),
       description: z.string(),
@@ -26,171 +26,137 @@ export class CreateTimesheetController {
 
   @Post('timesheet/:year/:month/:day')
   @HttpCode(204)
-  @UsePipes(new ZodValidationPipe(createTimesheetBodySchema))
   async handle(
     @Param('year') year: number,
     @Param('month') month: number,
     @Param('day') day: number,
     @Body() body: CreateTimesheetBodySchema,
     @CurrentUser()
-    jwt: {
-      resources: string[];
-    },
+    jwt: { id: string; resources: string[] },
   ): Promise<void> {
     if (!jwt.resources.includes('POST_TIMESHEET')) {
       throw new ForbiddenException('Access denied');
     }
 
-    // Check closed month
-    const isMonthClosed = await this.isMonthClosed(year, month);
-    if (isMonthClosed) {
-      throw new BadRequestException('Month is closed');
-    }
-
-    // Validate time ranges
-    body.period.forEach((period) => {
-      const startHour = new Date(period.start).getHours();
-      const endHour = new Date(period.end).getHours();
-      if (startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23) {
-        throw new BadRequestException('Invalid time range');
-      }
-    });
-
-    // Validate time order (start < end)
-    body.period.forEach((period) => {
-      const startTime = new Date(period.start).getTime();
-      const endTime = new Date(period.end).getTime();
-      if (endTime <= startTime) {
-        throw new BadRequestException('End time must be greater than start time');
-      }
-    });
-
-    // Validate overlapping periods
-    for (let i = 0; i < body.period.length; i++) {
-      for (let j = i + 1; j < body.period.length; j++) {
-        const start1 = new Date(body.period[i].start).getTime();
-        const end1 = new Date(body.period[i].end).getTime();
-        const start2 = new Date(body.period[j].start).getTime();
-        const end2 = new Date(body.period[j].end).getTime();
-
-        if ((start1 >= start2 && start1 < end2) || (end1 > start2 && end1 <= end2)) {
-          throw new BadRequestException('Time ranges cannot overlap');
-        }
-      }
-    }
-
     const date = new Date(year, month - 1, day);
 
-    const existingTimesheet = await this.prisma.release.findFirst({
+    const existingTimesheets = await this.prisma.release.findMany({
       where: {
-        date,
+        date: date,
+        id_user: jwt.id,
       },
     });
 
-    if (existingTimesheet) {
-      return await this.updateTimesheet(year, existingTimesheet.id, body);
-    }
+    const holidays = await this.getHolidays(Number(year));
 
-    const data = { year, month, day };
-    return await this.createTimesheet(data, jwt, body);
-  }
+    this.validatePeriods(body.period);
 
-  private async isMonthClosed(year: number, month: number): Promise<boolean> {
-    const currentDate = new Date();
-    const inputDate = new Date(year, month - 1);
+    for (const period of body.period) {
+      const startParts = this.getTimeParts(period.start);
+      const endParts = this.getTimeParts(period.end);
 
-    return inputDate < new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  }
+      if (!this.isValidTime(startParts) || !this.isValidTime(endParts)) {
+        throw new Error('Period values cannot exceed 00:00 and 23:59');
+      }
 
-  private async createTimesheet(date: any, jwt: any, body: CreateTimesheetBodySchema) {
-    const holidays = await this.getHolidays(date.year);
+      let startTime = new Date(year, month - 1, day, startParts.hours, startParts.minutes);
+      let endTime = new Date(year, month - 1, day, endParts.hours, endParts.minutes);
 
-    const periods = body.period.map((el) => {
-      const start = new Date(el.start);
-      const end = new Date(el.end);
+      const isHoliday = holidays.some((holiday) => {
+        const holidayDate = new Date(holiday.date);
+        return holidayDate.getFullYear() === date.getFullYear() && holidayDate.getMonth() === date.getMonth() && holidayDate.getDate() === date.getDate();
+      });
 
-      // Check if the period is a holiday and apply default hours if applicable
-      const isHoliday = holidays.some((holiday) => holiday.date === start.toISOString().slice(0, 10));
-      const holidayStart = isHoliday ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), 8, 0) : start;
-      const holidayEnd = isHoliday ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12, 0) : end;
+      if (isHoliday) {
+        const defaultStart = { hours: 8, minutes: 0 };
+        const defaultEnd = { hours: 17, minutes: 0 };
 
-      return {
-        start: holidayStart.toISOString(),
-        end: holidayEnd.toISOString(),
-        description: el.description,
-      };
-    });
+        const defaultStartTime = new Date(year, month - 1, day, defaultStart.hours, defaultStart.minutes);
+        const defaultEndTime = new Date(year, month - 1, day, defaultEnd.hours, defaultEnd.minutes);
 
-    for (const period of periods) {
-      const startTime = new Date(period.start);
-      const endTime = new Date(period.end);
+        if (startTime < defaultStartTime) {
+          startTime = defaultStartTime;
+        }
+
+        if (endTime > defaultEndTime) {
+          endTime = defaultEndTime;
+        }
+      }
+
       const timeDifference = differenceInHours(endTime, startTime);
 
-      await this.prisma.release.create({
-        data: {
-          id: uuidv4(),
-          id_user: jwt.id,
-          date: new Date(date.year, date.month - 1, date.day),
-          holiday: '',
-          total: String(timeDifference),
-          start_hour: period.start,
-          end_hour: period.end,
-          description: period.description,
-        },
-      });
-    }
-  }
+      const existingTimesheet = existingTimesheets.find((ts) => ts.id === period.id);
 
-  private async updateTimesheet(year: number, releaseId: string, body: CreateTimesheetBodySchema) {
-    const total = String(this.calculateTotalTime(body.period));
-    const holidays = await this.getHolidays(year);
-
-    const periods = body.period.map((period) => {
-      const start = new Date(period.start);
-      const end = new Date(period.end);
-
-      const isHoliday = holidays.some((holiday) => holiday.date === start.toISOString().slice(0, 10));
-      const holidayStart = isHoliday ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), 8, 0) : start;
-      const holidayEnd = isHoliday ? new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12, 0) : end;
-
-      return {
-        start: holidayStart.toISOString(),
-        end: holidayEnd.toISOString(),
-        description: period.description,
-      };
-    });
-
-    for (const period of periods) {
-      await this.prisma.release.update({
-        where: {
-          id: releaseId,
-        },
-        data: {
-          total,
-          start_hour: period.start,
-          end_hour: period.end,
-          description: period.description,
-        },
-      });
+      if (existingTimesheet) {
+        await this.prisma.release.update({
+          where: { id: existingTimesheet.id },
+          data: {
+            total: String(timeDifference),
+            start_hour: period.start,
+            end_hour: period.end,
+            description: period.description,
+          },
+        });
+      } else {
+        await this.prisma.release.create({
+          data: {
+            id: uuidv4(),
+            id_user: jwt.id,
+            date: date,
+            holiday: isHoliday,
+            total: String(timeDifference),
+            start_hour: period.start,
+            end_hour: period.end,
+            description: period.description,
+          },
+        });
+      }
     }
   }
 
   private async getHolidays(year: number): Promise<any> {
     return this.prisma.holiday.findMany({
-      where: {
-        year,
-      },
+      where: { year },
     });
   }
 
-  private calculateTotalTime(periods: { start: string; end: string }[]): number {
-    let totalTime = 0;
+  private isValidTime(timeParts: { hours: number; minutes: number }): boolean {
+    return timeParts.hours >= 0 && timeParts.hours <= 23 && timeParts.minutes >= 0 && timeParts.minutes <= 59;
+  }
+
+  private getTimeParts(timeStr: string) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return { hours, minutes };
+  }
+
+  private validatePeriods(periods: any[]): void {
     for (const period of periods) {
-      const startTime = new Date(period.start);
-      const endTime = new Date(period.end);
-      const timeDifference = differenceInHours(endTime, startTime);
-      totalTime += timeDifference;
+      const start = this.getTimeInMinutes(period.start);
+      const end = this.getTimeInMinutes(period.end);
+
+      if (start > end) {
+        throw new BadRequestException('The period values are inverted');
+      }
     }
-    return totalTime;
+
+    const sortedPeriods = periods.slice().sort((a, b) => {
+      const startTimeA = this.getTimeInMinutes(a.start);
+      const startTimeB = this.getTimeInMinutes(b.start);
+      return startTimeA - startTimeB;
+    });
+
+    for (let i = 0; i < sortedPeriods.length - 1; i++) {
+      const currentEnd = this.getTimeInMinutes(sortedPeriods[i].end);
+      const nextStart = this.getTimeInMinutes(sortedPeriods[i + 1].start);
+
+      if (currentEnd > nextStart) {
+        throw new BadRequestException('Overlapping values ​​are not allowed');
+      }
+    }
+  }
+
+  private getTimeInMinutes(timeStr: string): number {
+    const { hours, minutes } = this.getTimeParts(timeStr);
+    return hours * 60 + minutes;
   }
 }

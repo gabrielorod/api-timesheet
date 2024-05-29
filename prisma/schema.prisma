@@ -82,7 +82,7 @@ model Release {
   id          String   @id @default(uuid())
   id_user     String
   date        DateTime
-  holiday     DateTime
+  holiday     Boolean
   start_hour  String
   end_hour    String
   total       String

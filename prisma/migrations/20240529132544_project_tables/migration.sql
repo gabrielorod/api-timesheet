@@ -53,7 +53,7 @@ CREATE TABLE "bank_hours" (
     "id" TEXT NOT NULL,
     "id_user" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
-    "hour" TIMESTAMP(3) NOT NULL,
+    "hour" DOUBLE PRECISION NOT NULL,
     "description" TEXT NOT NULL,
 
     CONSTRAINT "bank_hours_pkey" PRIMARY KEY ("id")
@@ -64,9 +64,9 @@ CREATE TABLE "releases" (
     "id" TEXT NOT NULL,
     "id_user" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
-    "holiday" TIMESTAMP(3) NOT NULL,
-    "start_hour" TIMESTAMP(3) NOT NULL,
-    "end_hour" TIMESTAMP(3) NOT NULL,
+    "holiday" BOOLEAN NOT NULL,
+    "start_hour" TEXT NOT NULL,
+    "end_hour" TEXT NOT NULL,
     "total" TEXT NOT NULL,
     "description" TEXT NOT NULL,
 
@@ -102,6 +102,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "recover_passwords_id_user_key" ON "recover_passwords"("id_user");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "bank_hours_id_user_key" ON "bank_hours"("id_user");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_id_group_fkey" FOREIGN KEY ("id_group") REFERENCES "groups"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

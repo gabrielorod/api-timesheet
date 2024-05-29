@@ -1363,7 +1363,7 @@ components:
                 example: 'Invalid/required fields'
   securitySchemes:
     JwtAuth:
-      type: http
+      type: controllers
       scheme: bearer
       bearerFormat: JWT
     ApiAuth:

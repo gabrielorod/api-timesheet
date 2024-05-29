@@ -1,8 +1,7 @@
-import { Body, Controller, ForbiddenException, HttpCode, Put, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, HttpCode, Put, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user-decorator';
 
@@ -19,7 +18,7 @@ export class UpdateHolidayController {
 
   @Put('holiday/:year')
   @HttpCode(204)
-  @UsePipes(new ZodValidationPipe(updateHolidayBodySchema))
+  // @UsePipes(new ZodValidationPipe(updateHolidayBodySchema))
   async handle(@Body() body: UpdateHolidayBodySchema, @CurrentUser() jwt: { resources: string[] }, year: number): Promise<void> {
     if (!jwt.resources.includes('PUT_HOLIDAY')) {
       throw new ForbiddenException('Access denied');

@@ -1,7 +1,6 @@
-import { BadRequestException, Body, Controller, Put, UsePipes } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Put } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
 
 const putRecoverPasswordSchema = z.object({
@@ -17,7 +16,7 @@ export class AuthChangePasswordController {
   constructor(private prisma: PrismaService) {}
 
   @Put('recover-password')
-  @UsePipes(new ZodValidationPipe(putRecoverPasswordSchema))
+  // @UsePipes(new ZodValidationPipe(putRecoverPasswordSchema))
   async resetPassword(@Body() body: PutRecoverPasswordBody) {
     const { hash, code, password } = body;
 

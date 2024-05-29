@@ -1,9 +1,8 @@
-import { Body, ConflictException, Controller, ForbiddenException, HttpCode, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, ConflictException, Controller, ForbiddenException, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { hash } from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user-decorator';
 
@@ -28,7 +27,7 @@ export class CreateUserController {
 
   @Post('user')
   @HttpCode(200)
-  @UsePipes(new ZodValidationPipe(createUserBodySchema))
+  // @UsePipes(new ZodValidationPipe(createUserBodySchema))
   async handle(@Body() body: CreateUserBodySchema, @CurrentUser() jwt: { resources: string[] }): Promise<any> {
     if (!jwt.resources.includes('POST_USER')) {
       throw new ForbiddenException('Access denied');

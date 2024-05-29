@@ -1,6 +1,5 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Param, Put, UseGuards, UsePipes } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Param, Put, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
 import { CurrentUser } from '../../auth/current-user-decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -24,7 +23,7 @@ export class UpdateUserPasswordController {
   constructor(private prisma: PrismaService) {}
 
   @Put(':id')
-  @UsePipes(new ZodValidationPipe(changeUserPasswordBody))
+  // @UsePipes(new ZodValidationPipe(changeUserPasswordBody))
   async updateUserPassword(@Body() body: ChangeUserPasswordBody, @Param('id') id: string, @CurrentUser() jwt: { resources: string[] }) {
     if (!jwt.resources.includes('PUT_USER')) {
       throw new ForbiddenException('Access denied');

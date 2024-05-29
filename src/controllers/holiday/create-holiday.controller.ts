@@ -1,8 +1,7 @@
-import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user-decorator';
 
@@ -22,7 +21,7 @@ export class CreateHolidayController {
 
   @Post('holiday')
   @HttpCode(204)
-  @UsePipes(new ZodValidationPipe(createHolidayBodySchema))
+  // @UsePipes(new ZodValidationPipe(createHolidayBodySchema))
   async handle(@Body() body: CreateHolidayBodySchema, @CurrentUser() jwt: { resources: string[] }): Promise<void> {
     const { year, days } = body;
 

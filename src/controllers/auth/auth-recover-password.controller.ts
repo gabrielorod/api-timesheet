@@ -1,6 +1,5 @@
-import { Body, Controller, HttpCode, Post, UnauthorizedException, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,7 +15,7 @@ export class AuthRecoverPasswordController {
 
   @Post('recover-password')
   @HttpCode(204)
-  @UsePipes(new ZodValidationPipe(postRecoverPasswordSchema))
+  // @UsePipes(new ZodValidationPipe(postRecoverPasswordSchema))
   async initiatePasswordReset(@Body() body: PostRecoverPasswordBody) {
     const { email } = body;
 

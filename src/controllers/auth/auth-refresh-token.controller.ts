@@ -1,6 +1,5 @@
-import { Body, Controller, Post, UnauthorizedException, UsePipes } from '@nestjs/common';
+import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 import { z } from 'zod';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -18,7 +17,7 @@ export class AuthRefreshTokenController {
   ) {}
 
   @Post('/refresh-token')
-  @UsePipes(new ZodValidationPipe(refreshTokenBodySchema))
+  // @UsePipes(new ZodValidationPipe(refreshTokenBodySchema))
   async refreshToken(@Body() body: RefreshTokenBodySchema) {
     const { refreshToken } = body;
 

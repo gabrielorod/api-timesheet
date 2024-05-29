@@ -1,9 +1,9 @@
-import { Body, Controller, ForbiddenException, HttpCode, Param, Patch, UsePipes } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, HttpCode, Param, Patch, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { CurrentUser } from '../../auth/current-user-decorator';
 import { z } from 'zod';
-import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 const patchUserBankHourBody = z.object({
   date: z.string(),
@@ -14,12 +14,12 @@ const patchUserBankHourBody = z.object({
 type PatchUserBankHourBody = z.infer<typeof patchUserBankHourBody>;
 
 @Controller('/v1')
+@UseGuards(JwtAuthGuard)
 export class UserBankController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Patch('user/:id/bank')
   @HttpCode(204)
-  @UsePipes(new ZodValidationPipe(patchUserBankHourBody))
   async updateUserBank(
     @Param('id') id: string,
     @Body() body: PatchUserBankHourBody,
